@@ -1,0 +1,116 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url 'http://dl.bintray.com/radimk/maven'
+        }
+    }
+    dependencies {
+        classpath group: 'cz.kubacki.gradle.plugins',
+                   name: 'gradle-nbm-plugin',
+                version: '1.6.8+'
+        gradleApi()
+    }
+}
+apply plugin: 'java'
+apply plugin: 'nbm'
+
+repositories {
+    mavenCentral()
+    maven { url 'http://bits.netbeans.org/maven2/' }
+    maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
+    maven { url 'http://dl.bintray.com/kelemen/maven' }
+}
+
+// sourceSets {
+//     main {
+//         java {
+//             srcDir 'src/main/resources'
+//         }
+//     }
+// }
+compileJava {
+//   doFirst {
+//     project.file("$project.buildDir/src/main/generated-sources").mkdirs()
+//   }
+//   options.compilerArgs = ['-s', "$project.buildDir/src/main/generated-sources"]
+  options.compilerArgs = ['-sourcepath', "$project.projectDir/src/main/resources"]
+}
+
+nbm {
+    moduleName = 'org.netbeans.gradle.project'
+    // Module signing data
+    // keystore project.file('my_keystore')
+    // nbm_alias 'netbeansModule'
+    // storepass netbeansStorepass
+}
+
+dependencies {
+    compile 'org.netbeans.api:org-netbeans-api-annotations-common:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-api-debugger:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-api-debugger-jpda:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-api-java:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-api-java-classpath:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-api-progress:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-core-multiview:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-editor-indent-project:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-java-platform:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-java-project:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-java-source:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-options-api:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-projectapi:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-projectuiapi:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-modules-queries:RELEASE72'
+    compile 'org.netbeans.api:org-openide-actions:RELEASE72'
+    compile 'org.netbeans.api:org-openide-awt:RELEASE72'
+    compile 'org.netbeans.api:org-openide-dialogs:RELEASE72'
+    compile 'org.netbeans.api:org-openide-filesystems:RELEASE72'
+    compile 'org.netbeans.api:org-openide-io:RELEASE72'
+    compile 'org.netbeans.api:org-openide-loaders:RELEASE72'
+    compile 'org.netbeans.api:org-openide-modules:RELEASE72'
+    compile 'org.netbeans.api:org-openide-nodes:RELEASE72'
+    compile 'org.netbeans.api:org-openide-text:RELEASE72'
+    compile 'org.netbeans.api:org-openide-util:RELEASE72'
+    compile 'org.netbeans.api:org-openide-util-lookup:RELEASE72'
+    compile 'org.netbeans.api:org-openide-windows:RELEASE72'
+    compile 'org.netbeans.modules:org-netbeans-modules-gsf-testrunner:RELEASE72'
+    compile 'org.netbeans.api:org-netbeans-libs-javacapi:RELEASE72'
+    compile 'org.slf4j:slf4j-api:1.7.2'
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
+    compile project(':models')
+    // compile files(project.file('src/main/resources'))
+
+    compile 'org.gradle:gradle-tooling-api:1.11'
+    compile 'org.jtrim:jtrim-gui:1.7.1'
+    compile 'org.jtrim:jtrim-async:1.7.1'
+    compile 'org.jtrim:jtrim-core:1.7.1'
+    testCompile 'org.netbeans.api:org-netbeans-modules-nbjunit:RELEASE72'
+    testCompile 'org.netbeans.modules:org-netbeans-insane:RELEASE72'
+    testCompile 'org.netbeans.api:org-netbeans-libs-junit4:RELEASE72'
+    testCompile 'junit:junit:4.10'
+    testCompile 'com.google.guava:guava:14.0.1'
+    testCompile 'org.mockito:mockito-core:1.9.5'
+    // org.hamcrest:hamcrest-core:1.1
+    // org.objenesis:objenesis:1.0
+
+}
+
+// set netbeansInstallDir project property
+
+task netBeansRun(type: Exec) {
+    doFirst {
+        if (!project.hasProperty('netBeansInstallDir')) {
+            throw new GradleException("missing netBeansInstallDir property")
+        }
+        def confFile = project.file("$project.buildDir/testuserdir/etc/netbeans.conf")
+        confFile.parentFile.mkdirs()
+        confFile.write "netbeans_extraclusters=\"$project.buildDir/module\""
+    }
+
+    workingDir "${project.buildDir}"
+
+    //on windows:
+    commandLine netBeansInstallDir + '/bin/netbeans', '--userdir', "$project.buildDir/testuserdir"
+}
+

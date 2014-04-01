@@ -1,0 +1,7 @@
+include 'netbeans-gradle-default-models'
+include 'netbeans-gradle-plugin'
+
+rootProject.name = 'netbeansGradleProject'
+project(':netbeans-gradle-default-models').name = 'models'
+project(':netbeans-gradle-plugin').name = 'plugin'
+
